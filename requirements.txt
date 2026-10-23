@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+langchain
+langchain-openai
+langchain-chroma
+langchain-huggingface
+langchain-text-splitters
+langgraph
+sentence-transformers
+chromadb
+pydantic
+python-multipart
+langchain-community
+mlflow
+pypdf
+rank-bm25

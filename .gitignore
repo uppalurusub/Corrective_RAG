@@ -1,0 +1,76 @@
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Python
+__init__.py
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE and operating system
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Machine learning artifacts
+mlruns/
+mlartifacts/
+models/
+checkpoints/
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.onnx
+
+# Vector databases and local data
+chroma_db/
+chroma_data/
+data/raw/
+data/private/
+
+# Node.js / React
+node_modules/
+dist/
+.next/
+coverage/
+
+# Local databases
+*.sqlite
+*.sqlite3
