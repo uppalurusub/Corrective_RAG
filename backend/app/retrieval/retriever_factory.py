@@ -12,18 +12,22 @@ from langchain_core.documents import Document
 from app.implementations.vector_store import get_vector_store
 from app.retrieval.hybrid_retriever import HybridRetriever
 
-logger = logging.getLogger(__name__)
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-print("PROJECT_ROOT: ",PROJECT_ROOT)
+from app.config.settings import settings
+logger = settings.get_logger()
+
+""" PROJECT_ROOT = Path(__file__).resolve().parents[3]
+print("PROJECT_ROOT: ",PROJECT_ROOT) """
 
 def build_retrievers() -> dict:
-    # Reuse the exact store configuration used by ingestion.
+
     vector_store = get_vector_store()
     collection = vector_store._collection
+
     count = collection.count()
 
     logger.info(
-        "RAG vector store | collection=%s | count=%d",
+        "Chroma diagnostics | path={} | collection={} | count={}",
+        settings.resolved_vector_db_path,
         collection.name,
         count,
     )
@@ -31,12 +35,8 @@ def build_retrievers() -> dict:
     if count == 0:
         raise RuntimeError(
             f"Chroma collection '{collection.name}' is empty. "
-            "Run the document-ingestion pipeline before starting RAG."
+            "Ingest documents before starting the RAG application."
         )
-
-    dense_retriever = vector_store.as_retriever(
-        search_kwargs={"k": 5}
-    )
 
     stored = collection.get(
         include=["documents", "metadatas"]
@@ -46,11 +46,18 @@ def build_retrievers() -> dict:
     metadatas = stored.get("metadatas") or []
     ids = stored.get("ids") or []
 
+    readable_count = 0
+    empty_count = 0
+
     documents = []
 
     for i, text in enumerate(texts):
-        if not text or not text.strip():
+
+        if not isinstance(text, str) or not text.strip():
+            empty_count += 1
             continue
+
+        readable_count += 1
 
         metadata = (
             metadatas[i]
@@ -68,11 +75,37 @@ def build_retrievers() -> dict:
             )
         )
 
+    logger.info(
+        "Chroma document diagnostics | "
+        "records={} | returned_texts={} | readable={} | empty={}",
+        count,
+        len(texts),
+        readable_count,
+        empty_count,
+    )
+
+    # Log a small metadata sample, not document contents.
+    if metadatas:
+        logger.info(
+            "Chroma metadata sample | {}",
+            metadatas[0],
+        )
+
     if not documents:
         raise RuntimeError(
-            "Chroma contains records but no readable text "
-            "is available for BM25 indexing."
+            "BM25 initialization failed: Chroma contains records "
+            "but no readable document text. "
+            f"Collection={collection.name}, "
+            f"Path={settings.resolved_vector_db_path}, "
+            f"Records={count}, "
+            f"Returned texts={len(texts)}, "
+            f"Readable texts={readable_count}. "
+            "Verify ingestion path, collection name, and stored documents."
         )
+
+    dense_retriever = vector_store.as_retriever(
+        search_kwargs={"k": settings.top_k}
+    )
 
     bm25_retriever = BM25Retriever.from_documents(
         documents,
@@ -86,12 +119,12 @@ def build_retrievers() -> dict:
         bm25_weight=1.0,
         rrf_k=60,
         fetch_k=20,
-        default_top_k=5,
+        default_top_k=settings.top_k,
     )
 
     logger.info(
-        "RAG retrievers initialized | dense=enabled "
-        "| bm25=enabled | hybrid=enabled | chunks=%d",
+        "RAG retrievers initialized | "
+        "dense=enabled | bm25=enabled | hybrid=enabled | chunks={}",
         len(documents),
     )
 

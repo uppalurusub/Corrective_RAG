@@ -1,5 +1,4 @@
 
-import logging
 import re
 from typing import Literal
 
@@ -7,7 +6,8 @@ from pydantic import BaseModel, Field
 
 from langchain_core.prompts import ChatPromptTemplate
 
-logger = logging.getLogger(__name__)
+from app.config.settings import settings
+logger = settings.get_logger()
 
 RetrievalStrategy = Literal[
     "dense",

@@ -12,6 +12,7 @@ chromadb
 pydantic
 python-multipart
 langchain-community
-mlflow
+langsmith
 pypdf
 rank-bm25
+loguru

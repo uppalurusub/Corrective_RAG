@@ -1,12 +1,13 @@
 
 import hashlib
-import logging
+
 from dataclasses import dataclass
 from typing import Any, Sequence
 
 from langchain_core.documents import Document
 
-logger = logging.getLogger(__name__)
+from app.config.settings import settings
+logger = settings.get_logger()
 
 
 @dataclass(frozen=True)

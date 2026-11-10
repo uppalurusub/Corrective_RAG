@@ -1,0 +1,37 @@
+
+
+{
+  "question": "How much would two additional monitoring visits at each of the six sites cost, using the stated unit cost? Explain the calculation.",
+  "top_k": 5,
+  "include_sources": true
+}
+
+{
+  "question": "What are the key regulatory requirements?",
+  "top_k": 5,
+  "include_sources": true
+}
+
+
+{
+  "question": "What are the intended categories for this document?",
+  "top_k": 5,
+  "include_sources": true
+}
+
+
+
+{
+  "question": "How much would two additional monitoring visits at each of the six sites cost?",
+  "top_k_vector": 10,
+  "top_k": 5,
+  "include_sources": true
+}
+
+
+
+{
+  "question": "What is the illustrative total budget, including contingency?",
+  "top_k": 5,
+  "include_sources": true
+}

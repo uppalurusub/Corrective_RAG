@@ -11,8 +11,9 @@ from app.services.rag_service import RAGService
 from app.schemas.rag_schemas import IngestResponse
 from app.services.documents_service import DocumentsService
 from app.config.dependencies import documents_service
-from app.config.config import settings
-logger = logging.getLogger(__name__)
+from app.config.settings import settings
+logger = settings.get_logger()
+
 
 ALLOWED_EXTENSIONS = {".pdf", ".txt"}
 MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024  # 25 MB

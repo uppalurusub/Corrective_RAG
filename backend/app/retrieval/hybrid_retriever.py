@@ -1,6 +1,6 @@
 
 import hashlib
-import logging
+
 from collections import defaultdict
 from typing import Any, Sequence
 
@@ -9,7 +9,8 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from pydantic import ConfigDict, Field, PrivateAttr
 
-logger = logging.getLogger(__name__)
+from app.config.settings import settings
+logger = settings.get_logger()
 
 
 class HybridRetriever(BaseRetriever):

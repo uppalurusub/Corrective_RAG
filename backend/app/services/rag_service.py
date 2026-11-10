@@ -1,5 +1,4 @@
 
-import logging
 import time
 from typing import Any
 
@@ -7,7 +6,8 @@ from langchain_core.documents import Document
 
 from app.implementations.rag_impl import RAGImplementation
 
-logger = logging.getLogger(__name__)
+from app.config.settings import settings
+logger = settings.get_logger()
 
 
 class RAGService:

@@ -1,9 +1,9 @@
 from pathlib import Path
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from app.config.config import settings
-from app.implementations.vector_store import get_vector_store
 
+from app.implementations.vector_store import get_vector_store
+from app.config.settings import settings
 class IngestionImplementation:
     def __init__(self):
         self.root = settings.resolved_documents_dir

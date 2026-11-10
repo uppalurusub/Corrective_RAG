@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-import logging
+
 import re
 import time
 from dataclasses import asdict, dataclass, field
@@ -13,7 +13,8 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger(__name__)
+from app.config.settings import settings
+logger = settings.get_logger()
 
 
 # ============================================================

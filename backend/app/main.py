@@ -11,7 +11,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.config.llm_config import get_llm
+from app.config.settings import settings
+logger = settings.get_logger()
+
 from app.implementations.rag_impl import RAGImplementation
 from app.services.rag_service import RAGService
 
@@ -23,7 +25,7 @@ from app.retrieval.retriever_factory import build_retrievers
 # Load environment variables before initializing the LLM.
 load_dotenv()
 
-logger = logging.getLogger(__name__)
+
 
 
 def configure_logging() -> None:
@@ -55,7 +57,7 @@ async def lifespan(app: FastAPI):
         
 
         # 1. Initialize the LLM.
-        llm = get_llm()
+        llm = settings.get_model_client()
 
         if llm is None:
             raise RuntimeError(
@@ -63,6 +65,12 @@ async def lifespan(app: FastAPI):
             )
 
         logger.info("LLM initialized successfully")
+        logger.info(
+            "RAG configuration | documents_dir={} | vector_db_path={} | collection={}",
+            settings.resolved_documents_dir,
+            settings.resolved_vector_db_path,
+            settings.chroma_collection,
+        )
 
         # 2. Initialize retrievers once.
         retrievers = build_retrievers()

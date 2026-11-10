@@ -8,10 +8,10 @@ from langchain_core.documents import Document
 from app.graphs.corrective_rag_graph import (
     build_corrective_rag_graph,
 )
+from app.retrieval.retriever_factory import build_retrievers
 
-logger = logging.getLogger(__name__)
-from app.config.llm_config import get_llm
-llm = get_llm()
+from app.config.settings import settings
+logger = settings.get_logger()
 
 class RAGImplementation:
     """
@@ -34,66 +34,69 @@ class RAGImplementation:
 
     def __init__(
         self,
-        llm: Any = None,
-        retrievers: dict[str, Any] | None = None,
-        graph: Any = None,
-        max_retries: int = 2,
-    ) -> None:
-        #self.llm = llm
-        self.llm = llm if llm is not None else get_llm()
-        self.retrievers = retrievers
-        self.max_retries = max_retries
-        self.graph = graph
+        llm=None,
+        retrievers=None,
+        max_retries=None,
+    ):
+        self.llm = (
+            llm
+            if llm is not None
+            else settings.get_model_client()
+        )
 
-        if self.graph is None:
-            self._initialize_graph()
+        self.retrievers = (
+            retrievers
+            if retrievers is not None
+            else build_retrievers()
+        )
+
+        self.max_retries = (
+            max_retries
+            if max_retries is not None
+            else settings.max_retries
+        )
+
+        self._initialize_graph()
+
 
     def _initialize_graph(self) -> None:
-        """
-        Compile the graph once during application initialization.
 
-        Supply the LLM and retrievers through dependency injection.
-        Do not silently create dummy retrievers or an unconfigured LLM.
-        """
         if self.llm is None:
-            raise ValueError(
-                "An initialized LangChain LLM is required."
-            )
+            raise ValueError("LLM initialization failed.")
 
         if not isinstance(self.retrievers, dict):
             raise ValueError(
-                "Provide initialized retrievers as a dictionary."
+                "Retrievers must be provided as a dictionary."
             )
 
         if "hybrid" not in self.retrievers:
             raise ValueError(
-                "A hybrid retriever is required by the current graph."
+                "Hybrid retriever is missing."
             )
 
-        if not callable(getattr(self.retrievers["hybrid"], "invoke", None)):
-            raise TypeError(
-                "The hybrid retriever must implement invoke(query)."
-            )
-
-        if (
-            "dense" in self.retrievers
-            and not callable(
-                getattr(self.retrievers["dense"], "invoke", None)
-            )
+        if not callable(
+            getattr(self.retrievers["hybrid"], "invoke", None)
         ):
             raise TypeError(
-                "The dense retriever must implement invoke(query)."
+                "Hybrid retriever must implement invoke()."
             )
 
-        self.graph = build_corrective_rag_graph(
+        compiled_graph = build_corrective_rag_graph(
             llm=self.llm,
             retrievers=self.retrievers,
             max_retries=self.max_retries,
         )
 
+        if compiled_graph is None:
+            raise RuntimeError(
+                "build_corrective_rag_graph returned None."
+            )
+
+        self.graph = compiled_graph
+
         logger.info(
-            "Corrective RAG graph initialized | max_retries=%d",
-            self.max_retries,
+            "Corrective RAG graph initialized | graph_type={}",
+            type(self.graph).__name__,
         )
 
     def run(
